@@ -1,15 +1,33 @@
 import multer from "multer";
+import fs from "fs";
 import ValidationError from "../controllers/errorHandler.js";
 // Set up Multer storage configuration
 const storage = multer.diskStorage({
           destination: function (req, file, cb) {
-                    cb(null, './images/vehicles'); // Set the destination folder
+            const dir = './images/vehicles';
+        
+            // Check if the directory exists
+            fs.access(dir, fs.constants.F_OK, (err) => {
+              if (err) {
+                // Directory does not exist, create it
+                fs.mkdir(dir, { recursive: true }, (err) => {
+                  if (err) {
+                    return cb(err); // Return error if unable to create folder
+                  }
+                  cb(null, dir); // Call callback with the directory
+                });
+              } else {
+                // Directory exists
+                cb(null, dir);
+              }
+            });
           },
           filename: function (req, file, cb) {
-                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); // Generate a unique filename
-                    cb(null, file.fieldname + '-' + uniqueSuffix);
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); // Generate a unique filename
+            cb(null, file.fieldname + '-' + uniqueSuffix);
           }
-});
+        });
+
 const imageFileFilter = (req, file, cb) => {
           // Check the file's mimetype
           if (file.mimetype.startsWith('image/')) {
