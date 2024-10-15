@@ -1,6 +1,11 @@
 import ValidationError from "../controllers/errorHandler.js";
 import Vehicle from "../models/Vehicle.js";
 import Request from "../models/Request.js";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+import { promises as fs } from "fs"; 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const isLicensePlateExist = async (licensePlate) => {
           const vehicle = await Vehicle.findOne({ licensePlate });
           return vehicle;
@@ -45,3 +50,29 @@ export const updateVehicleById = async (id, data) => {
           }
           return updatedVehicle;
 }
+
+export const removeVehicleImageByVehicleId = async (vehicleId, imageName) => {
+          try {
+                    // Define the path to the image
+                    const imagePath = join(__dirname, "..", "images", "vehicles", imageName);
+
+                    // Delete the image file from the server
+                    await fs.unlink(imagePath);
+
+                    // After file deletion, update the database by removing the image reference
+                    const vehicleWithRemovedImage = await Vehicle.findByIdAndUpdate(
+                              vehicleId,
+                              { $pull: { images: imageName } },  // Use $pull to remove the image from the array
+                              { new: true }
+                    );
+
+                    if (!vehicleWithRemovedImage) {
+                              throw new Error("Vehicle not found");
+                    }
+
+                    return vehicleWithRemovedImage;
+
+          } catch (error) {
+                    throw new Error(error.message || 'Error removing vehicle image');
+          }
+};

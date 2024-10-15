@@ -5,5 +5,7 @@ const activitiesSchema = new mongoose.Schema({
           description: String,
           from: String,
           to: String
+}, {
+          timestamps: true
 })
 export default mongoose.model("Activities", activitiesSchema)

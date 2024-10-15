@@ -6,28 +6,42 @@ const RequestSchema = new mongoose.Schema({
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'Users',
           },
+          eventName: {
+                    required: true,
+                    type: String
+          },
+          eventLocation: {
+                    required: true,
+                    type: String
+          },
           vehicle: {
-                    require: true,
+                    required: true,
                     type: mongoose.Schema.Types.ObjectId,
                     ref: 'Vehicles',
           },
+          deploymentOdometer: {
+                    type: Number
+          },
+          returnedOdometer: {
+                    type: Number
+          },
           startDate: {
                     require: true,
-                    type: String,
+                    type: Date,
           },
           endDate: {
                     require: true,
-                    type: String
+                    type: Date
           },
+
           status: {
                     type: String,
                     default: 'Pending',
-                    enum: ['Pending', 'Approved', 'Rejected', 'Cancelled']
+                    enum: ['Pending', 'Approved', 'Rejected', 'Cancelled', 'Completed']
           },
           reviewedBy: {
-                    type: String
-                    // type: mongoose.Schema.Types.ObjectId,
-                    // ref: 'Admins'
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Admins'
           },
           message: String
 

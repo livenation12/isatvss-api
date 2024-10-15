@@ -1,11 +1,12 @@
 import jwt from 'jsonwebtoken';
 import AdminService from "../services/adminService.js";
 import ValidationError from './errorHandler.js';
-import { text } from 'express';
 
 const defaultCookieOptions = {
           httpOnly: true,
           maxAge: 1000 * 60 * 60 * 24,
+          sameSite: 'Lax',
+          secure: process.env.NODE_ENV === 'production', // Ensures cookie is secure in production
 }
 
 const createAdminToken = (admin) => {
@@ -44,7 +45,7 @@ export const verifyAdminToken = async (req, res) => {
           try {
                     const token = req.cookies.authToken;
                     if (!token) {
-                              return res.status(401).json({ error: "Unauthorized access. Please log in." });
+                              return res.status(401).json({ error: "Unauthorized access of admin. Please log in." });
                     }
                     const decoded = jwt.verify(token, process.env.SECRET_KEY);
                     if (!decoded.isAdmin) {

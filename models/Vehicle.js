@@ -15,7 +15,6 @@ const vehicleSchema = new mongoose.Schema({
           },
           color: {
                     type: String,
-                    required: true,
           },
           maxCapacity: {
                     type: Number,
@@ -26,10 +25,16 @@ const vehicleSchema = new mongoose.Schema({
                     required: true,
                     unique: true
           },
+          odoMeter: {
+                    type: Number,
+                    required: true,
+          },
           images: {
                     type: [String],
                     required: true,
           },
+}, {
+          timestamps: true
 })
 
 export default mongoose.model("Vehicles", vehicleSchema)

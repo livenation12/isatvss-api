@@ -1,8 +1,9 @@
 import UserService from "../services/userService.js"
 import jwt from 'jsonwebtoken'
 import ValidationError from "./errorHandler.js"
-import { inviteActivty } from "../services/activityService.js"
+import { inviteActivity } from "../services/activityService.js"
 import { baseMailOptions, transporter } from "../services/mailerService.js"
+import Admin from "../models/Admin.js"
 
 const createInviteToken = (email) => {
           return jwt.sign({ email }, process.env.SECRET_KEY, { expiresIn: '24h' })
@@ -22,18 +23,21 @@ export const sendInvite = async (req, res) => {
           if (!email) {
                     res.status(400).json(new ValidationError('Email is required', 'email', 400));
           }
-          try {
-                    const token = createInviteToken(email)
-                    const options = inviteMailOptions(email, token)
-                    const sendEmail = await transporter.sendMail(options)
-                    if (sendEmail) {
-                              const log = await inviteActivty(from, email)
-                              if (log) {
-                                        res.status(200).json({ success: true })
+          const admin = await Admin.findById(from)
+          if (admin) {
+                    try {
+                              const token = createInviteToken(email)
+                              const options = inviteMailOptions(email, token)
+                              const sendEmail = await transporter.sendMail(options)
+                              if (sendEmail) {
+                                        const log = await inviteActivity(admin.email, email)
+                                        if (log) {
+                                                  res.status(200).json({ success: true })
+                                        }
                               }
+                    } catch (error) {
+                              res.status(400).json(error)
                     }
-          } catch (error) {
-                    res.status(400).json(error)
           }
 }
 
@@ -55,6 +59,8 @@ const createUserToken = (user) => {
 const defaultCookieOptions = {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
+          sameSite: 'Lax',
+          secure: process.env.NODE_ENV === 'production',
 }
 export const login = async (req, res) => {
           try {
@@ -79,7 +85,7 @@ export const logout = (req, res) => {
 export const verifyUserToken = (req, res) => {
           const token = req.cookies.authToken
           if (!token) {
-                    return res.status(401).json({ error: "Unauthorized access. Please log in." });
+                    return res.status(401).json({ error: "Unauthorized access of user, please log in." });
           }
           try {
                     const decoded = jwt.verify(token, process.env.SECRET_KEY);

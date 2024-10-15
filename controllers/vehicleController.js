@@ -1,4 +1,4 @@
-import { getAllVehicles, create, getVehicleById, updateVehicleById } from "../services/vehicleService.js"
+import { getAllVehicles, create, getVehicleById, updateVehicleById, removeVehicleImageByVehicleId } from "../services/vehicleService.js"
 import Vehicle from "../models/Vehicle.js";
 export const getVehicles = async (req, res) => {
           try {
@@ -7,7 +7,7 @@ export const getVehicles = async (req, res) => {
           } catch (error) {
                     res.status(400).json(error)
           }
-}
+}         
 
 export const getVehicle = async (req, res) => {
           try {
@@ -82,3 +82,16 @@ export const deleteVehicle = async (req, res) => {
                     res.status(400).send(error.message);
           }
 };
+
+export const removeVehicleImage = async (req, res) => {
+          try {
+                    const vehicleWithRemovedImage = await removeVehicleImageByVehicleId(req.params.vehicleId, req.body.imageName);
+                    if (vehicleWithRemovedImage) {
+                              return res.status(200).json({ data: vehicleWithRemovedImage, success: true });
+                    } else {
+                              return res.status(500).json({ message: "Error updating the vehicle" });
+                    }
+          } catch (error) {
+                    res.status(400).send(error.message);
+          }
+}
